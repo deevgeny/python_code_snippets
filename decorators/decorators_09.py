@@ -1,26 +1,42 @@
-"""Decorators with arguments."""
+"""Nested decorators."""
 
 
 import sys
 import functools
 
 
-def repeat(num_times):
-    def decorator_repeat(func):
-        @functools.wraps(func)
-        def wrapper_repeat(*args, **kwargs):
-            for _ in range(num_times):
-                func(*args, **kwargs)
-        return wrapper_repeat
-    return decorator_repeat
+def do_twice(func):
+    functools.wraps(func)
+    def wrapper_do_twice(*args, **kwargs):
+        func(*args, **kwargs)
+        func(*args, **kwargs)
+    return wrapper_do_twice
 
 
-@repeat(num_times=3)
-def hello(name):
-    print(f"Hello {name}!")
+def pop_up(func):
+    functools.wraps(func)
+    def wrapper_pop_up(*args, **kwargs):
+        print("Pop up :-)")
+        func(*args, **kwargs)
+    return wrapper_pop_up
 
 
 def main():
+    @do_twice
+    @pop_up
+    def hello(name):
+        print(f"Hello {name}!")
+
+    # Hint: hello = do_twice(pop_up(hello("user")))
+    hello("user")
+    print()
+
+    @pop_up
+    @do_twice
+    def hello(name):
+        print(f"Hello {name}!")
+
+    # Hint: hello = pop_up(do_twice(hello("user")))
     hello("user")
 
 

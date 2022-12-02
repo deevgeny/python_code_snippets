@@ -1,31 +1,42 @@
-"""Timing decorator."""
+"""How to preserve decorated function name and docstring."""
 
 
 import sys
 import functools
-import time
 
 
-def timer(func):
-    """Check runtime of decorated function."""
-    functools.wraps(func)
-    def wrapper_timer(*args, **kwargs):
-        start = time.perf_counter()
-        value = func(*args, **kwargs)
-        runtime = time.perf_counter() - start
-        print(f"Finished {func.__name__!r} in {runtime:.4f} secs")
-        return value
-    return wrapper_timer
+def do_not_preserve(func):
+    def wrapper_do_not_preserve(*args, **kwargs):
+        """Wrapper function."""
+        return func(*args, **kwargs)
+    return wrapper_do_not_preserve
 
 
-@timer
-def waste_time(val):
-    for _ in range(val):
-        sum([i ** 2 for i in range(val)])
+def preserve(func):
+    @functools.wraps(func)
+    def wrapper_preserve(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper_preserve
 
 
 def main():
-    waste_time(100)
+    @do_not_preserve
+    def who_am_i():
+        """Who am I function."""
+        return "\nWho am I?"
+
+    print(who_am_i())
+    print("Func name:", who_am_i.__name__)
+    print("Func docstring:", who_am_i.__doc__)
+
+    @preserve
+    def who_am_i():
+        """Who am I function."""
+        return "\nWho am I?"
+
+    print(who_am_i())
+    print("Func name:", who_am_i.__name__)
+    print("Func docstring:", who_am_i.__doc__)
 
 
 if __name__ == "__main__":

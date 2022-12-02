@@ -1,39 +1,44 @@
-"""Improved slow down decorator."""
+"""Classes as decorators.
+Method __call__() is defined to make class instance be callable.
+Hint: 
+>>>decorated_func = CountCalls(func)
+>>>decorated_func(*args, **kwargs)
+"""
 
 
 import sys
 import functools
-import time
 
 
-def slow_down(_func=None, *, rate=1):
-    """Wait given amount of seconds before calling the function"""
-    def decorator_slow_down(func):
-        @functools.wraps(func)
-        def wrapper_slow_down(*args, **kwargs):
-            time.sleep(rate)
-            return func(*args, **kwargs)
-        return wrapper_slow_down
+class CountCalls:
+    def __init__(self, func):
+        functools.update_wrapper(self, func)
+        self.func = func
+        self.num_calls = 0
 
-    if _func is None:
-        return decorator_slow_down
-    return decorator_slow_down(_func)
+    def __call__(self, *args, **kwargs):
+        self.num_calls += 1
+        print(f"Call {self.num_calls} of {self.func.__name__!r}")
+        return self.func(*args, **kwargs)
 
 
-@slow_down(rate=2)
-def accelerate(target, speed=0):
-    if speed == target:
-        print("Done!")
-        return
-    print(speed)
-    accelerate(target, speed + 1)
+@CountCalls
+def hello():
+    print("Hello!")
+
+
+@CountCalls
+def bye():
+    print("Bye!")
 
 
 def main():
-    accelerate(3)
-    print("Call slow down.")
-    slow_down()
-    print("Well done!")
+    hello()
+    hello()
+    print(hello.num_calls)
+    print()
+    bye()
+    print(bye.num_calls)
 
 
 if __name__ == "__main__":

@@ -1,40 +1,31 @@
-"""Register decorator."""
+"""Slow down decorator."""
 
 
 import sys
-import random
+import functools
+import time
 
 
-FUNCTIONS = dict()
+def slow_down(func):
+    """Wait 1 second before calling the function"""
+    @functools.wraps(func)
+    def wrapper_slow_down(*args, **kwargs):
+        time.sleep(1)
+        return func(*args, **kwargs)
+    return wrapper_slow_down
 
 
-def register(func):
-    """Register a function as a plug-in"""
-    FUNCTIONS[func.__name__] = func
-
-
-@register
-def hello(name):
-    return f"Hello {name}!"
-
-
-@register
-def hi(name):
-    return f"Hi {name}!"
-
-
-def random_greet(name):
-    func_name, func = random.choice(list(FUNCTIONS.items()))
-    print(f"Using {func_name!r}")
-    print(func(name))
+@slow_down
+def accelerate(target, speed=0):
+    if speed == target:
+        print("Done!")
+        return
+    print(speed)
+    accelerate(target, speed + 1)
 
 
 def main():
-    random_greet("user")
-    print()
-    random_greet("user")
-    print()
-    random_greet("user")
+    accelerate(10)
 
 
 if __name__ == "__main__":

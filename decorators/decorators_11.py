@@ -1,37 +1,39 @@
-"""Stateful decorator."""
+"""With and without arguments version.
+https://peps.python.org/pep-3102/
+"""
 
 
 import sys
 import functools
 
 
-def count_calls(func):
-    @functools.wraps(func)
-    def wrapper_count_calls(*args, **kwargs):
-        wrapper_count_calls.num_calls += 1
-        print(f"Call {wrapper_count_calls.num_calls} of {func.__name__!r}")
-        return func(*args, **kwargs)
-    wrapper_count_calls.num_calls = 0
-    return wrapper_count_calls
+def repeat(_func=None, *, num_times=2):
+    def decorator_repeat(func):
+        @functools.wraps(func)
+        def wrapper_repeat(*args, **kwargs):
+            for _ in range(num_times):
+                value = func(*args, **kwargs)
+            return value
+        return wrapper_repeat
+
+    if _func is None:
+        return decorator_repeat
+    return decorator_repeat(_func)
 
 
-@count_calls
-def hello():
+@repeat
+def say_hello():
     print("Hello!")
 
 
-@count_calls
-def bye():
-    print("Bye!")
+@repeat(num_times=3)
+def hello(name):
+    print(f"Hello {name}!")
 
 
 def main():
-    hello()
-    hello()
-    print(hello.num_calls)
-    print()
-    bye()
-    print(bye.num_calls)
+    say_hello()
+    hello("user")
 
 
 if __name__ == "__main__":

@@ -1,30 +1,39 @@
-"""Singletons with decorators."""
+"""Improved slow down decorator with optional arguments."""
 
 
 import sys
 import functools
+import time
 
 
-def singleton(cls):
-    """Singleton class (only one instance)"""
-    @functools.wraps(cls)
-    def wrapper_singleton(*args, **kwargs):
-        if not wrapper_singleton.instance:
-            wrapper_singleton.instance = cls(*args, **kwargs)
-        return wrapper_singleton.instance
-    wrapper_singleton.instance = None
-    return wrapper_singleton
+def slow_down(_func=None, *, rate=1):
+    """Wait given amount of seconds before calling the function"""
+    def decorator_slow_down(func):
+        @functools.wraps(func)
+        def wrapper_slow_down(*args, **kwargs):
+            time.sleep(rate)
+            return func(*args, **kwargs)
+        return wrapper_slow_down
+
+    if _func is None:
+        return decorator_slow_down
+    return decorator_slow_down(_func)
 
 
-@singleton
-class Single:
-    pass
+@slow_down(rate=2)
+def accelerate(target, speed=0):
+    if speed == target:
+        print("Done!")
+        return
+    print(speed)
+    accelerate(target, speed + 1)
 
 
 def main():
-    first = Single()
-    second = Single()
-    print(first is second)
+    accelerate(3)
+    print("Call slow down.")
+    slow_down()
+    print("Well done!")
 
 
 if __name__ == "__main__":
